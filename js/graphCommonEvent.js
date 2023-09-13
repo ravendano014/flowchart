@@ -1,185 +1,185 @@
 /**
- * 工具栏-导入/导出功能
- */
+  * Toolbar-Import/Export function
+  */
 function handleImportOrExport(e) {
-  var isImport = e.target.className.indexOf('in'),
-    textarea = $('.json_data textarea');
-  $('.ui.modal.json_data').modal({
-    onApprove: function() {
-      if (isImport !== -1) { // 导入
-        var jsonStr = textarea.val();
-        if (jsonStr) {
-          var jsonObj = JSON.parse(jsonStr);
-          jsonObj = edgeAssociateNode(jsonObj);
-          graph_main.nodes = graph_main.nodes.concat(jsonObj.nodes);
-          graph_main.edges = graph_main.edges.concat(jsonObj.edges);
-          graph_main.updateGraph();
-        }
-      }
-    },
-    onHidden: function() {
-      textarea.val('');
-    }
-  })
-  .modal('setting', 'transition', 'scale')
-  .modal('show');
+   var isImport = e.target.className.indexOf('in'),
+     textarea = $('.json_data textarea');
+   $('.ui.modal.json_data').modal({
+     onApprove: function() {
+       if (isImport !== -1) { // Import
+         var jsonStr = textarea.val();
+         if (jsonStr) {
+           var jsonObj = JSON.parse(jsonStr);
+           jsonObj = edgeAssociateNode(jsonObj);
+           graph_main.nodes = graph_main.nodes.concat(jsonObj.nodes);
+           graph_main.edges = graph_main.edges.concat(jsonObj.edges);
+           graph_main.updateGraph();
+         }
+       }
+     },
+     onHidden: function() {
+       textarea.val('');
+     }
+   })
+   .modal('setting', 'transition', 'scale')
+   .modal('show');
 
-  var element_header = $('div.json_data .header');
-  if (isImport !== -1) {
-    element_header.text('导入数据');
-  } else {
-    element_header.text('导出数据');
-    var data = {
-      nodes: graph_main.nodes,
-      edges: graph_main.edges
-    };
-    textarea.val(JSON.stringify(data));
-  }
+   var element_header = $('div.json_data .header');
+   if (isImport !== -1) {
+     element_header.text('Import data');
+   } else {
+     element_header.text('Export data');
+     var data = {
+       nodes: graph_main.nodes,
+       edges: graph_main.edges
+     };
+     textarea.val(JSON.stringify(data));
+   }
 }
 
 /**
- * 工具栏-清空
- */
+  * Toolbar-Clear
+  */
 function clearGraph() {
-  layer.confirm('确认清空？', {
-    icon: 0,
-    btn: ['确定','取消'],
-    offset: '180px'
-  }, function() {
-    var pools = graphPool.pools;
-    for (var i = 0; i < pools.length; i++) {
-      var id = pools[i].containerId;
-      switch (id) {
-        case 'tab_main':
-          pools[i].deleteGraph();
-          break;
-        default:
-          $('.full-right [data-tab='+id+']').remove();
-          pools.splice(i, 1);
-          break;
-      }
-    }
-    layer.msg('删除成功', {icon: 1, offset: '180px', time: 600});
-  }, function() {
+   layer.confirm('Confirm to clear?', {
+     icon: 0,
+     btn: ['OK','Cancel'],
+     offset: '180px'
+   }, function() {
+     var pools = graphPool.pools;
+     for (var i = 0; i < pools.length; i++) {
+       var id = pools[i].containerId;
+       switch (id) {
+         case 'tab_main':
+           pools[i].deleteGraph();
+           break;
+         default:
+           $('.full-right [data-tab='+id+']').remove();
+           pools.splice(i, 1);
+           break;
+       }
+     }
+     layer.msg('Deleted successfully', {icon: 1, offset: '180px', time: 600});
+   }, function() {
     
-  });
+   });
   
 }
 
 /**
- * 工具栏-删除节点
- */
+  * Toolbar-Delete node
+  */
 function handleDeleteNode() {
-  var graph_active = graphPool.getGraphByActiveEdit();
-  var selectedNode = graph_active.state.selectedNode,
-    selectedEdge = graph_active.state.selectedEdge;
-  if (!selectedNode && !selectedEdge) {
-    layer.msg('请选中元素！', {time: 2000, icon: 0, offset: '180px'});
-    return;
-  } else {
-    layer.confirm('确定要删除选择元素吗？', {
-      icon: 0,
-      btn: ['确定','取消'],
-      offset: '180px'
-    }, function() {
-      if (selectedNode) {
-        var nodes = graph_active.nodes;
-        nodes.splice(nodes.indexOf(selectedNode), 1);
-        graph_active.spliceLinksForNode(selectedNode);
-        if (selectedNode.component === 'blockActivity') {
-          var containerId = 'tab_'+selectedNode.id;
-          $('.full-right [data-tab='+containerId+']').remove();
-          graphPool.removeGraphFromPools(containerId);
-        }
-        selectedNode = null;
-        graph_active.updateGraph();
-      } else if (selectedEdge) {
-        var edges = graph_active.edges;
-        edges.splice(edges.indexOf(selectedEdge), 1);
-        selectedEdge = null;
-        graph_active.updateGraph();
-      }
-      layer.msg('删除成功', {icon: 1, offset: '180px', time: 600});
-    }, function() {
+   var graph_active = graphPool.getGraphByActiveEdit();
+   var selectedNode = graph_active.state.selectedNode,
+     selectedEdge = graph_active.state.selectedEdge;
+   if (!selectedNode && !selectedEdge) {
+     layer.msg('Please select the element!', {time: 2000, icon: 0, offset: '180px'});
+     return;
+   } else {
+     layer.confirm('Are you sure you want to delete the selected element?', {
+       icon: 0,
+       btn: ['OK','Cancel'],
+       offset: '180px'
+     }, function() {
+       if (selectedNode) {
+         var nodes = graph_active.nodes;
+         nodes.splice(nodes.indexOf(selectedNode), 1);
+         graph_active.spliceLinksForNode(selectedNode);
+         if (selectedNode.component === 'blockActivity') {
+           var containerId = 'tab_'+selectedNode.id;
+           $('.full-right [data-tab='+containerId+']').remove();
+           graphPool.removeGraphFromPools(containerId);
+         }
+         selectedNode = null;
+         graph_active.updateGraph();
+       } else if (selectedEdge) {
+         var edges = graph_active.edges;
+         edges.splice(edges.indexOf(selectedEdge), 1);
+         selectedEdge = null;
+         graph_active.updateGraph();
+       }
+       layer.msg('Deleted successfully', {icon: 1, offset: '180px', time: 600});
+     }, function() {
       
-    });
-  }
+     });
+   }
 }
 
 /**
- * 工具栏-放大/缩小按钮 scale(0.3-2)
- */
+  * Toolbar-zoom in/zoom out button scale(0.3-2)
+  */
 function handleClickZoom() {
-  var graph_active = graphPool.getGraphByActiveEdit();
-  var translate = graph_active.dragSvg.translate(),
-    scale = graph_active.dragSvg.scale(),
-    extent = graph_active.dragSvg.scaleExtent(),
-    direction = 1,
-    factor = 0.1;
-  direction = (this.id === 'zoom-enlarge') ? 1 : -1;
-  if ((scale <= extent[0] && direction < 0) || (scale >= extent[1] && direction > 0)) {
-    return;
-  } else {
-    scale = parseFloat(scale) + factor * direction;
-  }
-  graph_active.dragSvg.scale(scale)
-      .translate(translate);
-  graph_active.zoomed();
+   var graph_active = graphPool.getGraphByActiveEdit();
+   var translate = graph_active.dragSvg.translate(),
+     scale = graph_active.dragSvg.scale(),
+     extent = graph_active.dragSvg.scaleExtent(),
+     direction = 1,
+     factor = 0.1;
+   direction = (this.id === 'zoom-enlarge') ? 1 : -1;
+   if ((scale <= extent[0] && direction < 0) || (scale >= extent[1] && direction > 0)) {
+     return;
+   } else {
+     scale = parseFloat(scale) + factor * direction;
+   }
+   graph_active.dragSvg.scale(scale)
+       .translate(translate);
+   graph_active.zoomed();
 }
 
 /**
- * 工具栏-还原缩放及归位
- */
+  * Toolbar-restore zoom and home position
+  */
 function resetZoom() {
-  var graph_active = graphPool.getGraphByActiveEdit();
-  graph_active.svgG.transition() // start a transition
-    .duration(1000) // make it last 1 second
-    .attr('transform', 'translate(0,0) scale(1)');
-  graph_active.dragSvg.scale(1);
-  graph_active.dragSvg.translate([0,0]);
+   var graph_active = graphPool.getGraphByActiveEdit();
+   graph_active.svgG.transition() // start a transition
+     .duration(1000) // make it last 1 second
+     .attr('transform', 'translate(0,0) scale(1)');
+   graph_active.dragSvg.scale(1);
+   graph_active.dragSvg.translate([0,0]);
 }
 
 /**
- * 工具栏-帮助
- */
+  * Toolbar-Help
+  */
 function handleHelp() {
-  if ($('.layer_notice').length) return;
-  layer.open({
-    type: 1,
-    shade: false,
-    title: false, // 不显示标题
-    offset: ['91px', '394px'],
-    content: '<ul class="layer_notice">'+
-             '  <li><a href="javascript:;">1. 将左侧活动拖至编辑区</a></li>'+
-             '  <li><a href="javascript:;">2. 选中"转移"或"自转移"，编辑区活动之间连线</a></li>'+
-             '  <li><a href="javascript:;">3. 右击活动和线都有自己的属性 </a></li>'+
-             '</ul>',
-    cancel: function() {
-      // console.log('helper closed!');
-    }
-  });
+   if ($('.layer_notice').length) return;
+   layer.open({
+     type: 1,
+     shade: false,
+     title: false, // Do not display the title
+     offset: ['91px', '394px'],
+     content: '<ul class="layer_notice">'+
+              ' <li><a href="javascript:;">1. Drag the left activity to the editing area</a></li>'+
+              ' <li><a href="javascript:;">2. Select "Transfer" or "Self-Transfer" to connect the activities in the editing area</a></li>'+
+              ' <li><a href="javascript:;">3. Right-click activities and lines have their own properties </a></li>'+
+              '</ul>',
+     cancel: function() {
+       // console.log('helper closed!');
+     }
+   });
 }
 
 /**
- * 左侧组件
- */
+  * Left component
+  */
 function handleComponentsBtn() {
-  $(this).siblings().removeClass('active').end().addClass('active');
-  var graph_active = graphPool.getGraphByActiveEdit(),
-    state = graph_active.state,
-    nodeName = $(this).attr('name'),
-    container = $('.svg-container');
-  if (nodeName === 'NOROUTING' || nodeName === 'SIMPLEROUTING') {
-    state.drawLine = nodeName;
-    container.on('mouseover mouseout', '.conceptG', function(e) {
-      if (e.type === 'mouseover') {
-        this.style.cursor = 'crosshair';
-      } else if (e.type == 'mouseout') {
-        this.style.cursor = 'default';
-      }
-    });
-  } else {
-    container.off('mouseover mouseout', '.conceptG');
+   $(this).siblings().removeClass('active').end().addClass('active');
+   var graph_active = graphPool.getGraphByActiveEdit(),
+     state = graph_active.state,
+     nodeName = $(this).attr('name'),
+     container = $('.svg-container');
+   if (nodeName === 'NOROUTING' || nodeName === 'SIMPLEROUTING') {
+     state.drawLine = nodeName;
+     container.on('mouseover mouseout', '.conceptG', function(e) {
+       if (e.type === 'mouseover') {
+         this.style.cursor = 'crosshair';
+       } else if (e.type == 'mouseout') {
+         this.style.cursor = 'default';
+       }
+     });
+   } else {
+     container.off('mouseover mouseout', '.conceptG');
     state.drawLine = null;
   }
 }
@@ -534,8 +534,7 @@ function handleNodeMenuProp() {
       //展示-常规
       var conventional = node.conventional;
       $('.conventional').find('input[name], textarea').each(function() {
-        for (var key in conventional) {
-          if (key == $(this).attr('name')) {
+        for (var key in conventional) {if (key == $(this).attr('name')) {
             $(this).val(conventional[key]);
           }
         }
